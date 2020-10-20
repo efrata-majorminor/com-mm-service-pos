@@ -32,19 +32,7 @@ namespace Com.MM.Service.Pos.Lib.ViewModels.SalesDoc
             {
                 yield return new ValidationResult("store is required", new List<string> { "storeId" });
             }
-            else
-            {
-                var dateFrom = new DateTime(DateTime.Now.Day + (DateTime.Now.Month + 1) + DateTime.Now.Year  + store.Shift.datefrom.Hour + store.Shift.datefrom.Minute + store.Shift.datefrom.Second);
-                var dateTo = new DateTime(DateTime.Now.Day + (DateTime.Now.Month + 1) + DateTime.Now.Year + store.Shift.dateto.Hour + store.Shift.dateto.Minute + store.Shift.dateto.Second);
-                if (dateFrom > dateTo)
-                {
-                    dateFrom = new DateTime(dateFrom.Day - 1);
-                }
-                if (dateFrom < DateTime.Now && DateTime.Now < dateTo)
-                {
-                    shift = store.Shift.shift;
-                }
-            }
+            
             if(salesDetail == null)
             {
                 yield return new ValidationResult("salesDetail is required", new List<string> { "salesDetail" });
