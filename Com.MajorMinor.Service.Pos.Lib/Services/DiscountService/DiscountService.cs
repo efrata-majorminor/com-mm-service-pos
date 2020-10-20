@@ -464,8 +464,6 @@ namespace Com.MM.Service.Pos.Lib.Services.DiscountService
             model.StartDate = viewModel.startDate;
             model.StoreCategory = viewModel.storeCategory;
             model.Information = viewModel.storeCategory;
-            model.StoreCode = viewModel.store.code;
-            model.StoreId = viewModel.store.id;
             model.StoreName = viewModel.store.name;
             model.Items = new List<DiscountItem>();
             //List<DiscountItem> discountItems = new List<DiscountItem>();
