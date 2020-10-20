@@ -18,11 +18,10 @@ namespace Com.MM.Service.Pos.Lib.Models.Discount
         public DateTimeOffset StartDate { get; set; }
         [MaxLength(255)]
         public string StoreCategory { get; set; }
-        public int StoreId { get; set; }
-        [MaxLength(255)]
-        public string StoreCode { get; set; }
         [MaxLength(255)]
         public string StoreName { get; set; }
+        [MaxLength(255)]
+        public string UId { get; set; }
 
         public virtual ICollection<DiscountItem> Items { get; set; }
     }

@@ -48,6 +48,8 @@ namespace Com.MM.Service.Pos.Lib.Models.SalesDoc
         [MaxLength(255)]
         public string StoreCode { get; set; }
         [MaxLength(255)]
+        public string StoreCategory { get; set; }
+        [MaxLength(255)]
         public string StoreName { get; set; }
         public int StoreId { get; set; }
         [MaxLength(255)]

@@ -190,6 +190,7 @@ namespace Com.MM.Service.Pos.Lib.Services.SalesDocService
             model.StoreCode = viewModel.store.Code;
             model.StoreId = viewModel.store.Id;
             model.StoreName = viewModel.store.Name;
+            model.StoreCategory = viewModel.store.StoreCategory;
             model.StoreStorageCode = viewModel.store.Storage.Code;
             model.StoreStorageId = viewModel.store.Storage._id;
             model.StoreStorageName = viewModel.store.Storage.Name;
@@ -283,6 +284,7 @@ namespace Com.MM.Service.Pos.Lib.Services.SalesDocService
                 Code = model.StoreCode,
                 Name = model.StoreName,
                 Id = model.StoreId,
+                StoreCategory = model.StoreCategory,
                
                 Storage = new StorageViewModel
                 {

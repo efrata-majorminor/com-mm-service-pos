@@ -15,5 +15,7 @@ namespace Com.MM.Service.Pos.Lib.Models.Discount
         public virtual int DiscountId { get; set; }
         [ForeignKey("DiscountId")]
         public virtual Discount Discount { get; set; }
+        [MaxLength(255)]
+        public string UId { get; set; }
     }
 }

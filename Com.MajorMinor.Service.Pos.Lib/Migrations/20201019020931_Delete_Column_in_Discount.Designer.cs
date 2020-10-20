@@ -4,14 +4,16 @@ using Com.Danliris.Service.Inventory.Lib;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Com.MM.Service.Pos.Lib.Migrations
 {
     [DbContext(typeof(PosDbContext))]
-    partial class PosDbContextModelSnapshot : ModelSnapshot
+    [Migration("20201019020931_Delete_Column_in_Discount")]
+    partial class Delete_Column_in_Discount
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,8 +49,7 @@ namespace Com.MM.Service.Pos.Lib.Migrations
                     b.Property<string>("StoreName")
                         .HasMaxLength(255);
 
-                    b.Property<string>("UId")
-                        .HasMaxLength(255);
+                    b.Property<string>("UId");
 
                     b.Property<string>("_CreatedAgent")
                         .IsRequired()
@@ -185,8 +186,7 @@ namespace Com.MM.Service.Pos.Lib.Migrations
                     b.Property<string>("RealizationOrder")
                         .HasMaxLength(255);
 
-                    b.Property<string>("UId")
-                        .HasMaxLength(255);
+                    b.Property<string>("UId");
 
                     b.Property<string>("_CreatedAgent")
                         .IsRequired()
@@ -385,9 +385,6 @@ namespace Com.MM.Service.Pos.Lib.Migrations
                         .HasMaxLength(255);
 
                     b.Property<int>("Shift");
-
-                    b.Property<string>("StoreCategory")
-                        .HasMaxLength(255);
 
                     b.Property<string>("StoreCode")
                         .HasMaxLength(255);
