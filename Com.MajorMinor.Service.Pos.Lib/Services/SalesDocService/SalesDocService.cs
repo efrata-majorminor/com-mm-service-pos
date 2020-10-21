@@ -3,6 +3,7 @@ using Com.Danliris.Service.Inventory.Lib.Helpers;
 using Com.Danliris.Service.Inventory.Lib.Services;
 using Com.MajorMinor.Service.Pos.Lib.Services.SalesDocService;
 using Com.MajorMinor.Service.Pos.Lib.ViewModels.NewIntegrationViewModel;
+using Com.MajorMinor.Service.Pos.Lib.ViewModels.SalesDoc;
 using Com.MM.Service.Pos.Lib.Interfaces;
 using Com.MM.Service.Pos.Lib.Models.SalesDoc;
 using Com.MM.Service.Pos.Lib.ViewModels.SalesDoc;
@@ -29,6 +30,9 @@ namespace Com.MM.Service.Pos.Lib.Services.SalesDocService
         public IIdentityService IdentityService;
         public readonly IServiceProvider ServiceProvider;
         public PosDbContext DbContext;
+
+      //  public IQueryable<PaymentMethodReportViewModel> Query { get; private set; }
+
         public SalesDocService(IServiceProvider serviceProvider, PosDbContext dbContext)
         {
             DbContext = dbContext;
@@ -565,5 +569,55 @@ namespace Com.MM.Service.Pos.Lib.Services.SalesDocService
             }
             return Updated;
         }
+
+
+
+        public IQueryable<PaymentMethodReportViewModel> GetPaymentReportQuery(string storecode, DateTimeOffset dateFrom, DateTimeOffset dateTo, string shift)
+        {  
+            var     Query = (from c in DbContext.SalesDocs
+                             where c._IsDeleted == false
+                             //&& c.StorageId == (string.IsNullOrWhiteSpace(storageId) ? c.StorageId : storageId)
+                             && c.Date.Date >= dateFrom.Date
+                             && c.Date.Date <= dateTo.Date
+                             && c.StoreCode == (string.IsNullOrWhiteSpace(storecode) ? c.StoreCode : storecode)
+                             && c.Shift == (string.IsNullOrWhiteSpace(shift) ? c.Shift : Convert.ToInt32(shift))
+                             //&& a.ItemName == (string.IsNullOrWhiteSpace(info) ? a.ItemName : info)
+
+                             select new PaymentMethodReportViewModel
+                             {
+                                 Code = c.Code == "" ? "-" : c.Code,
+                                 Date = c.Date,
+                                 BankName = c.BankName == "" ? "-" : c.BankName,
+                                 Card = c.Card == "" ? "-" : c.Card,
+                                 CardAmount = c.CardAmount,
+                                 CardTypeName = c.CardTypeName == "" ? "-" : c.CardTypeName,
+                                 IsVoid = c.isVoid,
+                                 VoucherValue = c.VoucherValue,
+                                 GrandTotal = c.GrandTotal,
+                                 Shift = c.Shift,
+                                 CashAmount = c.CashAmount,
+                                 PaymnetType = c.PaymentType == "" ? "-" : c.PaymentType,
+                                 SubTotal = c.SubTotal
+                             });
+
+          
+            return Query;
+        }
+
+        public Tuple<List<PaymentMethodReportViewModel>, int> GetPaymentMethodReport(string storecode, DateTimeOffset dateFrom, DateTimeOffset dateTo, string shift, string info,  int offset, string username, int page= 1, int size =25, string Order = "{}")
+        {
+            var Query = GetPaymentReportQuery(storecode,dateFrom, dateTo, shift);
+
+            Dictionary<string, string> OrderDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Order);
+    
+
+            // Pageable<InventoriesReportViewModel> pageable = new Pageable<InventoriesReportViewModel>(Query, page - 1, size);
+            List<PaymentMethodReportViewModel> Data = Query.ToList<PaymentMethodReportViewModel>();
+            // int TotalData = pageable.TotalCount;
+
+            return Tuple.Create(Data, Data.Count());
+
+        }
+
     }
 }
