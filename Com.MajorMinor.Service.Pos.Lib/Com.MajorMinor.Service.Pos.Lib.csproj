@@ -5,12 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="obj\Debug\netcoreapp2.0\Com.MajorMinor.Service.Pos.Lib.AssemblyInfo.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="obj\Debug\netcoreapp2.0\Com.MajorMinor.Service.Pos.Lib.csproj.FileListAbsolute.txt" />
-    <Content Include="obj\project.assets.json" />
+    <Compile Remove="Facades\**" />
+    <Compile Remove="ViewModels\InventoryDocumentViewModel\**" />
+    <EmbeddedResource Remove="Facades\**" />
+    <EmbeddedResource Remove="ViewModels\InventoryDocumentViewModel\**" />
+    <None Remove="Facades\**" />
+    <None Remove="ViewModels\InventoryDocumentViewModel\**" />
   </ItemGroup>
 
   <ItemGroup>
