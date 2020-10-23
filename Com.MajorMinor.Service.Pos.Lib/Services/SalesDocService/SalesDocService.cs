@@ -570,7 +570,7 @@ namespace Com.MM.Service.Pos.Lib.Services.SalesDocService
             return Updated;
         }
 
-
+        #region PaymentReport
 
         public IQueryable<PaymentMethodReportViewModel> GetPaymentReportQuery(string storecode, DateTimeOffset dateFrom, DateTimeOffset dateTo, string shift)
         {  
@@ -618,6 +618,256 @@ namespace Com.MM.Service.Pos.Lib.Services.SalesDocService
             return Tuple.Create(Data, Data.Count());
 
         }
+
+        #endregion
+
+
+        #region OmzetDailyReport
+        public TotalCategoryViewModel GetOmzetDayReportQuery( DateTimeOffset dateFrom, DateTimeOffset dateTo)
+        {
+
+            var Store = GetStoreData();
+
+            var SalesDocs = (from c in DbContext.SalesDocs
+                            where
+                              c._IsDeleted == false
+                              && c.Date.Date >= dateFrom.Date
+                              && c.Date.Date <= dateTo.Date
+
+                              select new
+                              {
+                                  StoreCode = c.StoreCode,
+                                  SubTotal = c.SubTotal,
+                                  TotalProduct = c.TotalProduct,
+                                  Remark = c.Remark
+                              }
+
+                );
+
+            var StandAlone = (from a in Store
+                              join c in SalesDocs on a.Code equals c.StoreCode into d from c in d.DefaultIfEmpty()
+                              where 
+                              //c._IsDeleted == false
+                              //&& c.Date.Date >= dateFrom.Date
+                              //&& c.Date.Date <= dateTo.Date
+                               a.SalesCategory == "STAND ALONE"
+                               && a.OnlineOffline =="OFFLINE"
+                              && a.Status == "OPEN"
+                              select new 
+                              {
+                                storeName = a.Name,
+                                storeCategory = a.SalesCategory,
+                                offlineOnline = a.OnlineOffline,
+                                subTotal = c == null ? 0 : c.SubTotal,
+                                totalProduct = c == null ? 0 : c.TotalProduct,
+                                remark = c== null ? "" : c.Remark
+
+                              });
+            var Konsinyasi = (from a in Store
+                              join c in SalesDocs on a.Code equals c.StoreCode into d
+                              from c in d.DefaultIfEmpty()
+                              where 
+                              a.SalesCategory == "KONSINYASI"
+                              && a.Status == "OPEN"
+                              
+                              select new
+                              {
+                                  storeName = a.Name,
+                                  storeCategory = a.SalesCategory,
+                                  offlineOnline = a.OnlineOffline,
+                                  subTotal = c == null ? 0 : c.SubTotal,
+                                  totalProduct = c == null ? 0 : c.TotalProduct,
+                                  remark = c == null ? "" : c.Remark
+
+                              });
+
+            var Online = (from a in Store
+                              join c in SalesDocs on a.Code equals c.StoreCode into d
+                              from c in d.DefaultIfEmpty()
+                              where 
+                              a.OnlineOffline == "ONLINE"
+                              && a.Status == "OPEN"
+                              select new
+                              {
+                                  storeName = a.Name,
+                                  storeCategory = a.SalesCategory,
+                                  offlineOnline = a.OnlineOffline,
+                                  subTotal = c == null ? 0 : c.SubTotal,
+                                  totalProduct = c == null ? 0 : c.TotalProduct,
+                                  remark = c == null ? "" : c.Remark
+
+                              });
+            var WholeSale = (from a in Store
+                              join c in SalesDocs on a.Code equals c.StoreCode into d
+                              from c in d.DefaultIfEmpty()
+                              where
+                               a.SalesCategory == "PENJUALAN UMUM"
+                              && a.Status == "OPEN"
+
+                              select new
+                              {
+                                  storeName = a.Name,
+                                  storeCategory = a.SalesCategory,
+                                  offlineOnline = a.OnlineOffline,
+                                  subTotal = c == null ? 0 : c.SubTotal,
+                                  totalProduct = c == null ? 0 : c.TotalProduct,
+                                  remark = c == null ? "" : c.Remark
+
+                              });
+
+            var CombineData = StandAlone.Union(Konsinyasi).Union(Online).Union(WholeSale).ToList();
+
+            var Query = (from data in CombineData
+
+                         group data by new { data.storeCategory, data.offlineOnline } into groupData
+                         select new CategoryViewModel
+                         {
+                           CategoryName = groupData.FirstOrDefault().storeCategory,
+                           OfflineOnline = groupData.FirstOrDefault().offlineOnline,
+                           GrandTotal = groupData.Sum(x=> x.subTotal),
+                           Count  = groupData.Sum(x => x.totalProduct),
+
+                         }).ToList();
+
+            CategoryCollectViewModel CategoryCollect = new CategoryCollectViewModel
+            {
+                StandAlone = Query.Find(x => x.CategoryName == "STAND ALONE"),
+                Konsinyasi = Query.Find(x => x.CategoryName =="KONSINYASI"),
+                Online     = Query.Find(x=>x.OfflineOnline == "ONLINE"),
+                WholeSale  = Query.Find(x =>x.CategoryName =="PENJUALAN UMUM")
+
+
+            };
+            
+            List<TotalViewModel> Stand_Alone = new List<TotalViewModel>();
+            foreach (var ip in CombineData.Where(x => x.storeCategory == "STAND ALONE" && x.offlineOnline =="OFFLINE"))
+            {
+                Stand_Alone.Add(new TotalViewModel
+                {
+                    Count = ip.totalProduct,
+                    GrandTotal = ip.subTotal,
+                    Store = new StoreViewModel
+                    {
+                        Name = ip.storeName,
+                        StoreCategory = ip.storeCategory
+
+                    }
+
+                });
+            };
+
+            List<TotalViewModel> Konsinyasi2 = new List<TotalViewModel>();
+            foreach (var ip in CombineData.Where(x => x.storeCategory == "KONSINYASI"))
+            {
+                Konsinyasi2.Add(new TotalViewModel
+                {
+                    Count = ip.totalProduct,
+                    GrandTotal = ip.subTotal,
+                    Store = new StoreViewModel
+                    {
+                        Name = ip.storeName,
+                        StoreCategory = ip.storeCategory
+
+                    }
+
+                });
+            };
+
+            List<TotalViewModel> Online2 = new List<TotalViewModel>();
+            foreach (var ip in CombineData.Where(x => x.offlineOnline == "ONLINE"))
+            {
+                Online2.Add(new TotalViewModel
+                {
+                    Count = ip.totalProduct,
+                    GrandTotal = ip.subTotal,
+                    Store = new StoreViewModel
+                    {
+                        Name = ip.storeName,
+                        StoreCategory = ip.storeCategory
+
+                    }
+
+                });
+            };
+
+            List<TotalViewModel> WholeSale2 = new List<TotalViewModel>();
+            foreach (var ip in CombineData.Where(x => x.storeCategory == "PENJUALAN UMUM"))
+            {
+                WholeSale2.Add(new TotalViewModel
+                {
+                    Count = ip.totalProduct,
+                    GrandTotal = ip.subTotal,
+                    Store = new StoreViewModel
+                    {
+                        Name = ip.storeName,
+                        StoreCategory = ip.storeCategory,
+                        Remark = ip.remark
+
+                    }
+
+                });
+            };
+
+
+
+            DataViewModel dataView = new DataViewModel
+            {
+                StandAlone = Stand_Alone,
+                Konsinyasi = Konsinyasi2,
+                Online = Online2,
+                WholeSale = WholeSale2
+            };
+
+            TotalCategoryViewModel totalCategory = new TotalCategoryViewModel
+            {
+                CategoryList = CategoryCollect,
+                DataList = dataView
+            };
+
+            return totalCategory;
+        }
+
+        public Tuple<TotalCategoryViewModel, int> GetOmzetDayReport(DateTimeOffset dateFrom, DateTimeOffset dateTo,  int offset, int page = 1, int size = 25, string Order = "{}")
+        {
+            var Query = GetOmzetDayReportQuery(dateFrom, dateTo);
+
+            Dictionary<string, string> OrderDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Order);
+
+
+            // Pageable<InventoriesReportViewModel> pageable = new Pageable<InventoriesReportViewModel>(Query, page - 1, size);
+            //TotalCategoryViewModel> Data = Query.ToList<TotalCategoryViewModel>();
+            // int TotalData = pageable.TotalCount;
+
+            return Tuple.Create(Query,1);
+
+        }
+
+
+        private List<StoreViewModel> GetStoreData()
+        {
+            string StoreUri = "master/stores";
+
+            string uri = StoreUri;
+            IHttpClientService httpClient = (IHttpClientService)this.ServiceProvider.GetService(typeof(IHttpClientService));
+            var response = httpClient.GetAsync($"{APIEndpoint.Core}{uri}").Result;
+            if (response.IsSuccessStatusCode)
+            {
+                var content = response.Content.ReadAsStringAsync().Result;
+                Dictionary<string, object> result = JsonConvert.DeserializeObject<Dictionary<string, object>>(content);
+                List<StoreViewModel> upo = JsonConvert.DeserializeObject<List<StoreViewModel>>(result.GetValueOrDefault("data").ToString()); ;
+                return upo;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        #endregion 
+
+
+
+
 
     }
 }
