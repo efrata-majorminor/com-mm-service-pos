@@ -658,7 +658,7 @@ namespace Com.MajorMinor.Service.Pos.Lib.Services.SalesDocReturnService
                                 Size = d.item.Size,
                                 SpesialDiscount = d.specialDiscount,
                                 Total = d.total,
-                                SalesDocDetailId = d.Id,
+                                SalesDocDetailId = t.Id,
                                 
                             });
                         }
